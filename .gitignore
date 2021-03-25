@@ -41,3 +41,6 @@ build
 
 #general
 *.class
+
+src/categories.txt
+src/curl.sh
