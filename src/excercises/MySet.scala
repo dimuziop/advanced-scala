@@ -29,11 +29,23 @@ trait MySet[A] extends (A => Boolean) {
 
   def isEmpty(): Boolean
 
-  /*def head(): A
-
-  def tail(): MySet[A]*/
-
   def apply(v1: A): Boolean = contains(v1)
+
+  /*
+  Exercise
+  + removing an element
+  - intersection with another set
+  - difference with another set
+   */
+
+  def -(elem: A): MySet[A]
+
+  def &(anotherSet: MySet[A]): MySet[A] // intersection
+
+  def --(anotherSet: MySet[A]): MySet[A] // difference
+
+  def unary_! : MySet[A]
+
 }
 
 class EmptySet[A] extends MySet[A] {
@@ -53,108 +65,63 @@ class EmptySet[A] extends MySet[A] {
 
   override def isEmpty(): Boolean = true
 
-  /*override def head(): A = throw new EmptySetException
+  override def -(elem: A): MySet[A] = this
 
-  override def tail(): MySet[A] = throw new EmptySetException*/
+  override def &(anotherSet: MySet[A]): MySet[A] = this
+
+  override def --(anotherSet: MySet[A]): MySet[A] = this
+
+  override def unary_! : MySet[A] = new AllInclusiveSet[A]
 }
+
+class AllInclusiveSet[A] extends MySet[A] {
+  override def contains(elem: A): Boolean = true
+
+  override def +(elem: A): MySet[A] = this
+
+  override def ++(anotherSet: MySet[A]): MySet[A] = this
+
+  override def map[B](f: A => B): MySet[B] = ???
+
+  override def flatMap[B](f: A => MySet[B]): MySet[B] = ???
+
+  override def filter(predicate: A => Boolean): MySet[A] = ??? // property based set
+
+  override def foreach(f: A => Unit): Unit = ???
+
+  override def isEmpty(): Boolean = ???
+
+  override def -(elem: A): MySet[A] = ???
+
+  override def &(anotherSet: MySet[A]): MySet[A] = filter(anotherSet)
+
+  override def --(anotherSet: MySet[A]): MySet[A] = filter(!anotherSet)
+
+  override def unary_! : MySet[A] = new EmptySet[A]
+}
+
 
 class NonEmptySet[A](head: A, tail: MySet[A]) extends MySet[A] {
 
-  /*override def contains(elem: A): Boolean = {
-    @tailrec
-    def auxContains(value: MySet[A]): Boolean =
-      if (value.head == elem) true
-      else if (value.tail().isEmpty()) false
-      else auxContains(value.tail())
-    auxContains(this)
-  }*/
-
   override def contains(elem: A): Boolean =
     elem == head || tail.contains(elem)
-
-  /*override def +(elem: A): MySet[A] = {
-    @tailrec
-    def add(mySet: MySet[A], acc: MySet[A]): MySet[A] ={
-      if (mySet.isEmpty()) acc
-      else add(mySet.tail(), new NonEmptySet[A](mySet.head(), acc))
-    }
-    if(this.contains(elem)) this
-    else add(this, new NonEmptySet[A](elem, new EmptySet[A]))
-  }*/
 
   override def +(elem: A): MySet[A] = {
     if (this contains elem) this
     else new NonEmptySet[A](elem, this)
   }
 
-  /*override def ++(anotherSet: MySet[A]): MySet[A] = {
-    @tailrec
-    def add(mySet: MySet[A], acc: MySet[A]): MySet[A] ={
-      if (mySet.isEmpty()) acc
-      else add(mySet.tail(), acc + mySet.head())
-    }
-    add(this, anotherSet)
-
-  }*/
-
   override def ++(anotherSet: MySet[A]): MySet[A] = tail ++ anotherSet + head
-
-
-
-  /*override def map[B](f: A => B): MySet[B] = {
-    @tailrec
-    def helperFn(mySet: MySet[A], acc: MySet[B]): MySet[B] = {
-      if (mySet.tail().isEmpty()) new NonEmptySet[B](f(mySet.head()), acc)
-      else helperFn(mySet.tail(), new NonEmptySet[B](f(mySet.head()), acc))
-    }
-
-    helperFn(this, new EmptySet[B])
-  }*/
 
   override def map[B](f: A => B): MySet[B] = (tail map f) + f(head)
 
-  /*override def flatMap[B](f: A => MySet[B]): MySet[B] = {
-
-    @tailrec
-    def flatMapHelper(value: MySet[A], acc: MySet[B]): MySet[B] = {
-      if (value.tail().isEmpty()) f(value.head())
-      else flatMapHelper(value.tail(), f(value.head()))
-    }
-
-    flatMapHelper(this, new EmptySet[B])
-
-  }*/
-
   override def flatMap[B](f: A => MySet[B]): MySet[B] = (tail flatMap f) ++ f(head)
-
-  /*override def filter(predicate: A => Boolean): MySet[A] = {
-    @tailrec
-    def filterAux(subject: MySet[A], acc: MySet[A]): MySet[A] = {
-      if (subject.isEmpty()) acc
-      else if (predicate(subject.head())) filterAux(subject.tail(), acc + subject.head())
-      else filterAux(subject.tail(), acc)
-    }
-
-    filterAux(this, new EmptySet[A])
-  }*/
 
   override def filter(predicate: A => Boolean): MySet[A] = {
     val filteredTail = tail filter predicate
     if (predicate(head)) filteredTail + head
     else filteredTail
   }
-
-  /*override def foreach(f: A => Unit): Unit = {
-    @tailrec
-    def feAux(head: A, tail: MySet[A]): Unit =
-      if (tail.isEmpty()) f(head)
-      else {
-        f(head)
-        feAux(tail.head(), tail.tail())
-      }
-
-    feAux(this.head, this.tail)
-  }*/
 
   override def foreach(f: A => Unit): Unit = {
     f(head)
@@ -163,10 +130,23 @@ class NonEmptySet[A](head: A, tail: MySet[A]) extends MySet[A] {
 
   override def isEmpty(): Boolean = false
 
-  /*override def head(): A = this.head
+  override def -(elem: A): MySet[A] = {
+    if (head == elem) tail
+    else tail - elem + head
+    //filter(subject => subject != elem)
+  }
 
-  override def tail(): MySet[A] = this.tail*/
+  override def &(anotherSet: MySet[A]): MySet[A] = {
+    //filter(subject => anotherSet.contains(subject))
+    filter(anotherSet)
+  }
 
+  override def --(anotherSet: MySet[A]): MySet[A] = {
+    //filter(subject => !anotherSet(subject)) ++ anotherSet.filter(elem => !contains(elem))
+    filter(!anotherSet)
+  }
+
+  override def unary_! : MySet[A] = ???
 }
 
 object MySet {
@@ -185,7 +165,7 @@ class EmptySetException extends RuntimeException
 
 object Test extends App {
   val mySet = new NonEmptySet[Int](5, new NonEmptySet[Int](35, new NonEmptySet[Int](18, new EmptySet[Int])))
-  val mySet1 = new NonEmptySet[Int](8, new NonEmptySet[Int](35, new EmptySet[Int]))
+  val mySet1 = new NonEmptySet[Int](8, new NonEmptySet[Int](35, new NonEmptySet[Int](18, new EmptySet[Int])))
 
   val mySetIntersection = mySet ++ mySet1
 
@@ -210,4 +190,12 @@ object Test extends App {
   println("--------------")
 
   mySet1.foreach(println)
+  println("Intersec")
+  (mySet & mySet1).foreach(println)
+  println("Diff")
+  (mySet -- mySet1).foreach(println)
+
+  println("Minus")
+  (((mySet - 5) - 35) - 18).foreach(println)
+
 }
