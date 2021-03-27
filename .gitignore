@@ -42,5 +42,5 @@ build
 #general
 *.class
 
-src/categories.txt
-src/curl.sh
+../../../../Milloh/Libs/Scrap/src/main/scala/categories.txt
+../../../../Milloh/Libs/Scrap/src/main/scala/curl.sh

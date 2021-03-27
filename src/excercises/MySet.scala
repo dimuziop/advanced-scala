@@ -224,4 +224,7 @@ object Test extends App {
   println(negativeEven(5))
   println((negativeEven + 5)(5));
 
+  new NonEmptySet[Int](1, new NonEmptySet[Int](5, new EmptySet[Int]))
+
+
 }
