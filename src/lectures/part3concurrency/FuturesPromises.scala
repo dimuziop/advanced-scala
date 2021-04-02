@@ -57,9 +57,7 @@ object FuturesPromises extends App {
       "fb.id.3-dummy" -> "Dummy"
     )
 
-    val friends = Map(
-      "fb.id.1-zuck" -> "fb.id.2-bill",
-    )
+    val friends = Map("fb.id.1-zuck" -> "fb.id.2-bill")
 
     val random = new Random()
 
