@@ -58,23 +58,6 @@ object TypeClasses extends App {
     def serialize(user: User): String = s"<div>${user.name} </div>"
   }
 
-  trait Equal[T] {
-    def apply(main: T, other: T): Boolean
-  }
-
-  implicit object NameEquality extends Equal[User] {
-    override def apply(main: User, other: User): Boolean = main.name == other.name
-  }
-
-  println(NameEquality(User("Braulio", 37, "braulio@braulio.com"), User("Braulio", 37, "braulio@braulio.com")))
-
-  object Equal {
-    def apply[T](main: T, other: T)(implicit evaluator: Equal[T]): Boolean = evaluator.apply(main, other)
-  }
-
-  // AD-HOC Polymorphism
-  Equal[User](User("Braulio", 37, "braulio@braulio.com"), User("Braulio", 37, "braulio@braulio.com"))
-
   // part 2
   object HTMLSerializer {
     def serialize[T](value: T)(implicit serializer: HTMLSerializer[T]): String =
